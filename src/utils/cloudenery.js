@@ -20,4 +20,4 @@ const uploadFile = async (localFilePath)=>{
    }
 }
 
-export default uploadFile
+export  {uploadFile}
