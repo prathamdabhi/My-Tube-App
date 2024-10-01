@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { reagisterUser } from "../controllers/user.controller.js";
+import { login, logout, reagisterUser } from "../controllers/user.controller.js";
 import {upload} from '../middlewares/multyer.middleware.js'
+import { verifyJWT } from "../middlewares/auth.middlware.js";
 
 const router = Router();
-
+//REGISTER
 router.route('/register').post(
     upload.fields([{
         name:"avatar",
@@ -14,4 +15,9 @@ router.route('/register').post(
     }]),
     reagisterUser)
 
+//LOGIN
+router.route('/login').get(login)
+
+//LOGOUT
+router.route('/logout').get(verifyJWT,logout)
 export default router
