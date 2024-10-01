@@ -4,6 +4,7 @@ import {User} from '../models/user.model.js'
 import  {uploadFile}  from "../utils/cloudenery.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
+//REGISTER USER
 const reagisterUser = asyncHandler(async (req,res)=>{
     //get user details from frontend
     //validation - empty fields
@@ -19,15 +20,15 @@ const reagisterUser = asyncHandler(async (req,res)=>{
     //     message:"user Register Sucessfully"
     // })
 
-  const {userName,email,fullName,avatar,coverImage,password} = req.body
+  const {userName,email,fullName,password} = req.body
   console.log("email",email)
 
  if(
-    [userName,email,fullName,avatar,coverImage,password].some((filed)=> filed?.trim() === "")
+    [userName,email,fullName,password].some((filed)=> filed?.trim() === "")
  ){
     throw new ApiError(400,"All fields are required");
  }
- const findUser= User.findOne({
+ const findUser= await User.findOne({
     $or:[{userName},{email}]
  })
  if(findUser){
@@ -37,13 +38,13 @@ const reagisterUser = asyncHandler(async (req,res)=>{
  const avatarLocalPath = req.files?.avatar[0]?.path
  const coverImagelocalPath = req.files?.coverImage[0]?.path
 
- if(avatarLocalPath){
+ if(!avatarLocalPath){
     throw new ApiError(400,"Avatar file is required");
  }
- const avatarUrl = await uploadFile(avatarLocalPath)
- const coverImageUrl = await uploadFile(coverImagelocalPath)
+ const avatar = await uploadFile(avatarLocalPath)
+ const coverImage = await uploadFile(coverImagelocalPath)
 
- if(!avatarUrl){
+ if(!avatar){
     throw new ApiError(400,"Avatar file is required");
  }
  
@@ -51,14 +52,14 @@ const reagisterUser = asyncHandler(async (req,res)=>{
         userName,
         email,
         fullName,
-        avatar:avatarUrl,
-        coverImage:coverImageUrl,
+        avatar:avatar.url,
+        coverImage:coverImage.url,
         password
     })
 
-    const creatingUser = await user.findbyId(user._id).select("-password -refrechToken")
+    const creatingUser = await User.findById(user._id).select("-password -refrechToken")
 
-    if(creatingUser){
+    if(!creatingUser){
         throw new ApiError(500,"Something went wrong while registering the user" )
     }
 
@@ -67,6 +68,17 @@ const reagisterUser = asyncHandler(async (req,res)=>{
     )
 })
 
+//LOGIN USER
+const login = asyncHandler(async(req,res)=>{
+   // get user details from req.body
+   // check userName and email
+   //find the user
+   //check for password
+   //access token and refrsh token
+
+   
+})
 
 
-export {reagisterUser}
+
+export {reagisterUser,login}

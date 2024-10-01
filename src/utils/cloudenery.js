@@ -10,10 +10,14 @@ import fs from "fs";
 
 const uploadFile = async (localFilePath)=>{
    try {
-    if(!localFilePath) return "FilePath Is Not Prasent"
-   const fileuploadUrl = await cloudinary.uploader.upload(localFilePath,{
+   if(!localFilePath) return "FilePath Is Not Prasent"
+   const response  = await cloudinary.uploader.upload(localFilePath,{
     resource_type:"auto"
 })
+        //check if file has been uploaded successfull
+        console.log("file is uploaded on cloudinary ", response.url);
+        fs.unlinkSync(localFilePath)
+        return response 
    } catch (error) {
     fs.unlinkSync(localFilePath)
     console.log(error)
