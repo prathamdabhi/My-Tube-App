@@ -156,6 +156,7 @@ const options = {
    )
 })
 
+//REFRESH ACCESS TOKEN
 const refreshaccesstoken = asyncHandler(async (req,res)=>{
    try {
       const incomingrefreshToken = req.cookies?.refrechToken
@@ -188,8 +189,90 @@ const refreshaccesstoken = asyncHandler(async (req,res)=>{
    }
    
 })
+
+//CHANGE CURRENT PASSWORD
+const changeCurrentPassword = asyncHandler(async (req,res)=>{
+try {
+      const {currentPassword,newPassword} = req.body
+      const user = await User.findById(req.user._id)
+      const isPasswordCorrect = await user.isPasswordCorrect(currentPassword);
+      if(!isPasswordCorrect){
+         throw new ApiError(400,"Current password is incorrect")
+      }
+   
+      user.password = newPassword
+      await user.save({validateBeforeSave:false})
+      res
+      .status(200)
+      .json(
+         new ApiResponse(200,{},"Password changed successfully")
+      )
+} catch (error) {
+   throw new ApiError(401,error.message)
+}
+})
+
+// get User
+const getUSer = asyncHandler(async (req,res)=>{
+   const user = await User.findById(req.user._id)
+   if(!user){
+      throw new ApiError(401,"User is not present")
+   }
+   res
+   .status(200)
+   .json(
+      new ApiResponse(200,{
+         user:user
+      },
+   "User info get successfully")
+   )
+})
+const updateUserAvatar = asyncHandler(async (req,res)=>{
+   const avatarLocalPath = req.file?.path
+   if(!avatarLocalPath){
+      throw new ApiError(401,"avatarLocalPath is not available")
+   }
+   const avatar = await uploadFile(avatarLocalPath)
+   if(!avatar.url){
+      throw new ApiError(401,"Error while uploading Avatar")
+   }
+   const user = await User.findById(req.user?._id,{
+      $set:{
+         avatar:avatar.url
+      }},{new:true}
+   ).select("-password")
+   res
+   .status(200)
+   .json(
+      new ApiResponse(200,user,"Avatar update successfully")
+   )
+
+})
+
+const updateUserCoverImage = asyncHandler(async (req,res)=>{
+   const coverImageLocalPath = req.file?.path
+   if(!coverImageLocalPath){
+      throw new ApiError(401,"coverImageLocalPath is not available")
+   }
+   const coverImage = await uploadFile(coverImageLocalPath)
+   if(!coverImage.url){
+      throw new ApiError(401,"Error while uploading CoverImage")
+   }
+   const user = await User.findById(req.user?._id,{
+      $set:{
+         coverImage:coverImage.url
+      }},{new:true}
+   ).select("-password")
+
+   res
+   .status(200)
+   .json(
+      new ApiResponse(200,user,"coverImage update successfully")
+   )
+
+})
   
 
 
 
-export {reagisterUser,login,logout,refreshaccesstoken}
+export {reagisterUser,login,logout,refreshaccesstoken,changeCurrentPassword,getUSer,updateUserAvatar,updateUserCoverImage}
