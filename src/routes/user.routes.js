@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { login, logout, reagisterUser } from "../controllers/user.controller.js";
+import { login, logout, reagisterUser,refreshaccesstoken } from "../controllers/user.controller.js";
 import {upload} from '../middlewares/multyer.middleware.js'
 import { verifyJWT } from "../middlewares/auth.middlware.js";
 
@@ -21,3 +21,6 @@ router.route('/login').get(login)
 //LOGOUT
 router.route('/logout').get(verifyJWT,logout)
 export default router
+
+//REFRESH ACCESS TOKEN
+router.route('/refresh-token').get(refreshaccesstoken)

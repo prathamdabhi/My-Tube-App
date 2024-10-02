@@ -68,7 +68,7 @@ userSchema.methods.createAccessToken = function(){
         fullName:this.fullName
     },process.env.ACCESS_TOKEN_SECRET,
    {
-        expiresIn: ACCESS_TOKEN_EXPIRE
+        expiresIn: process.env.ACCESS_TOKEN_EXPIRE
    })
 }
 
@@ -77,7 +77,7 @@ userSchema.methods.createRefrechToken = function(){
         _id:this._id
     },process.env.REFRESH_TOKEN_SECRET,
    {
-        expiresIn:REFRESH_TOKEN_EXPIRE
+        expiresIn:process.env.REFRESH_TOKEN_EXPIRE
    })
 }
 
