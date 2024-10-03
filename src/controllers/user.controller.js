@@ -248,7 +248,7 @@ const updateUserAvatar = asyncHandler(async (req,res)=>{
    )
 
 })
-
+//UPDATE USER COVER IMAGE
 const updateUserCoverImage = asyncHandler(async (req,res)=>{
    const coverImageLocalPath = req.file?.path
    if(!coverImageLocalPath){
@@ -271,8 +271,81 @@ const updateUserCoverImage = asyncHandler(async (req,res)=>{
    )
 
 })
+
+//GET USER CHANNEL PROFILE
+const getUserChannelProfile = asyncHandler(async(req,res)=>{
+   const {userName} = req.param
+   if(!userName){
+      throw new ApiError(400,"User Cahnnel is Not Available")
+   }
+   const channel = await User.aggregate([
+     { $match:{
+         userName:userName
+      }},
+      {$lookup:{
+         from:"subscriptions",
+         localField:"_id",
+         foreignField:"channel",
+         as:"subscribers"
+      }},
+      {$lookup:{
+         from:"subscriptions",
+         localField:"_id",
+         foreignField:"suscriber",
+         as:"subscribTo"
+      }},
+      {
+         $addFields:{
+            subscriberCount:{
+               $size:"$subscribers"
+            },
+            subscribToCount:{
+               $size:"$subscribTo"
+            },
+            isSubscribe:{
+               $cond:{
+                  if:{$in:[req.user?.id,"$subscribers.suscriber"]},
+                  then:true,
+                  else:false
+               }
+            }
+         }
+      },{
+         $project:{
+            fullName:1,
+            userName:1,
+            email:1,
+            subscriberCount:1,
+            subscribToCount:1,
+            avatar:1,
+            coverImage:1,
+            createdAt:1
+         }
+      }
+   ])
+   if(!channel){
+      throw new ApiError(404,"Channel Does not Exeicst")
+   }
+   console.log(channel)
+   res
+   .status(200)
+   .json(
+      new ApiResponse(200,channel[0],"User Channel fetch successfully")
+   )
+   
+   
+})
   
 
 
 
-export {reagisterUser,login,logout,refreshaccesstoken,changeCurrentPassword,getUSer,updateUserAvatar,updateUserCoverImage}
+export {reagisterUser,
+   login,
+   logout,
+   refreshaccesstoken,
+   changeCurrentPassword,
+   getUSer,
+   updateUserAvatar,
+   updateUserCoverImage,
+   getUserChannelProfile
+}
